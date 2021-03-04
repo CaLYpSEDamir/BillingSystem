@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+  payment:
+    container_name: payment
+    build:
+      dockerfile: ./docker/Dockerfile
+      context: ./payment
+    ports:
+      - 8000:8000
+    command: start_runserver
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:13-alpine
+    container_name: payment_postgres
+    ports:
+      - 5435:5432
+    restart: always
+    volumes:
+      - payment_pg:/var/lib/postgresql/data
+    env_file:
+      - ./payment/docker/config_env
+
+volumes:
+  payment_pg:

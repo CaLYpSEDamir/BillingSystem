@@ -1,0 +1,10 @@
+# === Database ===
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=payment
+POSTGRES_USER=payment
+POSTGRES_PASSWORD=payment
+
+# === Payment ===
+PAYMENT_DATABASE_HOST=postgres
+PAYMENT_DATABASE_PORT=5432
