@@ -1,21 +1,29 @@
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).parent.parent.parent))
+
 import asyncio
 import json
+from typing import Any, Dict
+
+import sqlalchemy
+import databases
 from aiokafka import AIOKafkaConsumer
 
+from app.models import (
+    users as users_model,
+    transactions as trans_model,
+)
+from app.schemas.transactions import (
+    AddMoneyEventSchema, EventEnum,
+)
 
-# import sys
-# from pathlib import Path
-# path = Path(__file__)
-# sys.path.append(str(path.parent.parent))
-# print(sys.path)
-# from app.database import engine
+# from app.database import engine, db
 
 # FIXME wait for topic creation
 # FIXME or make it with docker command
 
-
-import sqlalchemy
-import databases
 
 DATABASE_URL = 'postgresql://payment:payment@localhost:5432/payment'
 engine = sqlalchemy.create_engine(DATABASE_URL)
@@ -25,25 +33,36 @@ db = databases.Database(
     max_size=10,
 )
 
-
 topic = 'addition'
-
 loop = asyncio.get_event_loop()
 
 
-async def activate_db():
-    await db.connect()
+async def prepare_event(event):
+    """"""
+    print('Started:', event.offset)
+    payload = json.loads(event.value)
+    if payload['type'] == EventEnum.addition:
+        await add_money(payload=payload)
+    elif payload['type'] == EventEnum.transfer:
+        await transfer_money(payload=payload)
 
-# asyncio.run(activate())
+    print('Ended:', event.offset)
 
 
-async def add_money(user_id, amount):
+async def add_money(payload: Dict[str, Any]):
+    addition = AddMoneyEventSchema(**payload)
+    print(addition)
+    trans_id = addition.transaction_id
+    owner = addition.owner
+    amount = addition.amount
+
     async with db.transaction():
-        query = f'UPDATE balances SET amount = amount+{amount} WHERE "user" = {user_id};'
+
+        query = f'UPDATE balances SET amount = amount+{amount} WHERE owner = {owner};'
         await db.execute(query)
 
 
-async def transfer_money(from_id: int, to_id: int, amount: float, offset: int):
+async def transfer_money(payload: Dict[str, Any]):
     async with db.transaction():
         print('Started:', offset)
         substract_query = f'UPDATE balances SET amount = amount+{amount} WHERE "user" = {from_id};'
@@ -81,40 +100,32 @@ async def transfer_money(from_id: int, to_id: int, amount: float, offset: int):
 
 
 async def consume():
-
-    await activate_db()
+    """"""
+    await db.connect()
 
     consumer = AIOKafkaConsumer(
         topic,
         loop=loop,
         bootstrap_servers='localhost:9092',
         group_id="addition-consumer",
-        heartbeat_interval_ms=2000,
+        # heartbeat_interval_ms=2000,
     )
     await consumer.start()
 
     try:
-        async for msg in consumer:
-            print('Consumed:', msg.offset)
+        async for event in consumer:
+            print('Consumed:', event.offset)
             # print("consumed: ", msg.topic, msg.partition, msg.offset,
             #       msg.key, msg.value, msg.timestamp)
 
-            data = json.loads(msg.value)
-            print(1)
-            # await add_money(user_id=data['user_id'], amount=data['amount'], offset=msg.offset)
-            # await transfer_money(
+            loop.create_task(prepare_event(event=event))
+
+            # loop.create_task(transfer_money(
             #     from_id=data['user_id'],
             #     to_id=data['to_id'],
             #     amount=data['amount'],
             #     offset=msg.offset,
-            # )
-
-            loop.create_task(transfer_money(
-                from_id=data['user_id'],
-                to_id=data['to_id'],
-                amount=data['amount'],
-                offset=msg.offset,
-            ))
+            # ))
 
     finally:
         # Will leave consumer group; perform autocommit if enabled.

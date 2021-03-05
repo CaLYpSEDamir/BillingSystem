@@ -1,22 +1,20 @@
-
 from fastapi import APIRouter
 from app.database import db
+from app.schemas.balances import BalanceSchema
+from app.crud import balances as balances_crud
+from app.api.v1.routers.utils import get_user
 
 
 router = APIRouter()
 
 
-@router.get("/",
-            # response_model=List[schemas.User],
-            )
-def read_users(
-#     db: Session = Depends(deps.get_db),
-#     skip: int = 0,
-#     limit: int = 100,
-#     current_user: models.User = Depends(deps.get_current_active_superuser),
-):
+@router.get(
+    "/{user_id}/balance/",
+    response_model=BalanceSchema,
+)
+async def get_balance(user_id: int):
     """
-    Retrieve users.
+    Retrieve user's balance.
     """
-    print('asdf')
-    # return users
+    await get_user(db=db, user_id=user_id)
+    return await balances_crud.get_user_balance(db=db, user_id=user_id)

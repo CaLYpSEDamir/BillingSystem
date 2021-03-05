@@ -64,7 +64,7 @@ balances = sa.Table(
     metadata,
     sa.Column("id", sa.Integer, primary_key=True, index=True),
     sa.Column(
-        "user", sa.Integer, sa.ForeignKey('users.id'),
+        "owner", sa.Integer, sa.ForeignKey('users.id'),
         nullable=False, unique=True, index=True,
     ),
     sa.Column(
@@ -74,19 +74,21 @@ balances = sa.Table(
 )
 
 
-#
-# transactions = sa.Table(
-#     "transactions",
-#     metadata,
-#     sa.Column("id", sa.Integer, primary_key=True, index=True),
-#     sa.Column("owner", sa.Integer,
-#               # sa.ForeignKey('users.id'),
-#               nullable=False, index=True),
-#     sa.Column("other", sa.Integer,
-#               # sa.ForeignKey('users.id'),
-#               nullable=False),
-#     sa.Column("amount", sa.Float),
-#     sa.Column("uuid", sa.String, default=generate_uuid, nullable=False),
-#     sa.Column("state", Enum(TransactionStateEnum), nullable=False),
-#     sa.Column("created", sa.DateTime, server_default=sa.sql.func.now(), nullable=False),
-# )
+class TransactionStateEnum(enum.IntEnum):
+    """"""
+    PENDING = 1
+    SUCCESS = 2
+    CANCELED = 2
+    LOST = 4
+
+
+transactions = sa.Table(
+    "transactions",
+    metadata,
+    sa.Column("id", sa.Integer, primary_key=True, index=True),
+    sa.Column("owner", sa.Integer, sa.ForeignKey('users.id'), nullable=False, index=True),
+    # sa.Column("other", sa.Integer, sa.ForeignKey('users.id'), nullable=False),
+    sa.Column("amount", sa.Float),
+    sa.Column("state", sa.Integer, nullable=False),
+    sa.Column("created", sa.DateTime, server_default=sa.sql.func.now(), nullable=False),
+)

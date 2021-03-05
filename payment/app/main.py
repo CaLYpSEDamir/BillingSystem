@@ -2,7 +2,8 @@ from fastapi import FastAPI
 
 from .api.v1 import api_router
 from .database import create_tables, db
-from .broker.producer import aioproducer, create_topics
+from .broker import create_topics
+from .broker.producer import event_producer
 
 app = FastAPI(
     title="Billing System",
@@ -21,12 +22,12 @@ async def shutdown():
 
 @app.on_event("startup")
 async def startup_event():
-    await aioproducer.start()
+    await event_producer.start()
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    await aioproducer.stop()
+    await event_producer.stop()
 
 
 create_tables()
