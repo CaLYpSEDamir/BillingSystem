@@ -11,6 +11,7 @@ from . import schemas
 from .database import db, engine
 from .broker.producer import aioproducer
 from .models import users, balances
+
 # from .models import users, balances, transactions, TransactionStateEnum as TSE
 
 router = APIRouter()
@@ -68,6 +69,7 @@ async def get_user(user_id: int):
     balance = await db.fetch_one(query)
     print(user, balance)
 
+
 @router.post(
     "/users/{user_id}/add_money2/",
     tags=["balances"],
@@ -116,7 +118,6 @@ async def transfer_money(
             transaction_balance = res.scalar() or 0
             print(transaction_balance)
 
-
             # transfer_id = str(uuid.uuid4())
             #
             # query = transactions.insert().values(
@@ -149,7 +150,7 @@ async def get_balances(i: int):
     #     print(c)
 
     with engine.connect().execution_options(isolation_level="SERIALIZABLE") as conn:
-    # with engine.connect().execution_options(isolation_level="READ COMMITTED") as conn:
+        # with engine.connect().execution_options(isolation_level="READ COMMITTED") as conn:
         with conn.begin():
             # q = balances.select()
             # print(q)
@@ -175,7 +176,6 @@ async def get_balances(i: int):
 
 @router.get("/balances/")
 async def get_balances(i: int):
-
     async with db.transaction(isolation='serializable') as con:
         # if i == 2:
         scalar = await db.execute(f'select count(1) from balances where "user"={i}')
@@ -198,8 +198,6 @@ async def add_money(
         addition: schemas.AddMoney,
 ):
     """"""
-
-
 
     # await db.execute(query)
 
@@ -224,5 +222,3 @@ async def kafka_produce(id: int):
     msg = {'user_id': user_id, 'to_id': to_id, 'amount': 1}
 
     await aioproducer.send(topic, json.dumps(msg).encode("ascii"))
-
-

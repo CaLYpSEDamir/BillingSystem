@@ -12,7 +12,7 @@ async def get_user(db: Database, user_id: int) -> Mapping:
     if user is None:
         raise HTTPException(
             status_code=404,
-            detail="User is not found."
+            detail=f"User with ID `{user_id}` is not found."
         )
 
     return user

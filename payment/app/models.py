@@ -9,7 +9,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 
-from .database import Base, metadata
+from .database import metadata
 
 
 # class Users(Base):
@@ -59,6 +59,8 @@ users = sa.Table(
     sa.Column("name", sa.String, nullable=False),
 )
 
+BALANCES_AMOUNT_CHECK_NAME = 'balances_check_amount_is_not_negative'
+
 balances = sa.Table(
     "balances",
     metadata,
@@ -68,7 +70,10 @@ balances = sa.Table(
         nullable=False, unique=True, index=True,
     ),
     sa.Column(
-        "amount", sa.Float, sa.CheckConstraint('amount>=0'),
+        "amount",
+        sa.Float, sa.CheckConstraint(
+            'amount>=0', name=BALANCES_AMOUNT_CHECK_NAME,
+        ),
         server_default=sa.text("0"), nullable=False,
     ),
 )
@@ -78,16 +83,15 @@ class TransactionStateEnum(enum.IntEnum):
     """"""
     PENDING = 1
     SUCCESS = 2
-    CANCELED = 2
-    LOST = 4
+    NOT_ENOUGH_MONEY = 3
 
 
 transactions = sa.Table(
     "transactions",
     metadata,
     sa.Column("id", sa.Integer, primary_key=True, index=True),
-    sa.Column("owner", sa.Integer, sa.ForeignKey('users.id'), nullable=False, index=True),
-    # sa.Column("other", sa.Integer, sa.ForeignKey('users.id'), nullable=False),
+    sa.Column("from_user", sa.Integer, sa.ForeignKey('users.id'), nullable=False, index=True),
+    sa.Column("to_user", sa.Integer, sa.ForeignKey('users.id'), nullable=False),
     sa.Column("amount", sa.Float),
     sa.Column("state", sa.Integer, nullable=False),
     sa.Column("created", sa.DateTime, server_default=sa.sql.func.now(), nullable=False),

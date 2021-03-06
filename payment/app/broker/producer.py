@@ -1,11 +1,8 @@
 import asyncio
-import json
-from typing import Any, Dict
 
 from aiokafka import AIOKafkaProducer
 from app.schemas.transactions import (
-    AddMoneyEventSchema,
-    EventEnum,
+    TransferMoneyEventSchema,
 )
 
 CLIENT_ID = 'payment'
@@ -19,18 +16,13 @@ loop = asyncio.get_event_loop()
 class EventProducer(AIOKafkaProducer):
     """"""
 
-    async def addition_event(
-            self,
-            user_id: int,
-            amount: float,
-            transaction_id: int,
-    ):
-        event = AddMoneyEventSchema(
-            owner=user_id,
-            type= EventEnum.addition.value,
-            amount=amount,
-            transaction_id=transaction_id,
-        )
+    # async def send_event(self, event: AddMoneyEventSchema):
+    #     assert type(event) == AddMoneyEventSchema, 'Event must be AddMoneyEventSchema type.'
+    #
+    #     await self.send(TOPIC, event.json().encode())
+
+    async def send_event(self, event: TransferMoneyEventSchema):
+        assert type(event) == TransferMoneyEventSchema, 'Event must be TransferMoneyEventSchema type.'
 
         await self.send(TOPIC, event.json().encode())
 

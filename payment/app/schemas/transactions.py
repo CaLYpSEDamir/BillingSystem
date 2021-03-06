@@ -3,7 +3,8 @@ from enum import IntEnum
 from pydantic import BaseModel, validator
 
 
-class AddMoneySchema(BaseModel):
+class AmountSchema(BaseModel):
+    """"""
     amount: float
 
     @validator('amount')
@@ -15,14 +16,27 @@ class AddMoneySchema(BaseModel):
         return math.floor(value * 100) / 100
 
 
+class AddMoneyInSchema(AmountSchema):
+    """"""
+
+
+class TransferMoneyInSchema(AmountSchema):
+    """"""
+    to_user: int
+
+
+class TransferSchema(AmountSchema):
+    from_user: int
+    to_user: int
+
+
 class EventEnum(IntEnum):
     addition = 1
     transfer = 2
 
 
-# class AddMoneyEventSchema(AddMoneySchema):
-class AddMoneyEventSchema(BaseModel):
+class TransferMoneyEventSchema(AmountSchema):
     type: EventEnum
-    owner: int
-    amount: float
+    from_user: int
+    to_user: int
     transaction_id: int

@@ -1,7 +1,7 @@
 import databases
 import sqlalchemy
 from pydantic import BaseSettings
-from sqlalchemy.ext.declarative import declarative_base
+# from sqlalchemy.ext.declarative import declarative_base
 
 
 class DBSettings(BaseSettings):
@@ -26,8 +26,8 @@ db = databases.Database(
     min_size=5,
     max_size=10,
 )
-
-Base = declarative_base()
+print("Init DB")
+# Base = declarative_base()
 metadata = sqlalchemy.MetaData()
 
 
