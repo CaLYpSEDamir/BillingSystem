@@ -1,6 +1,8 @@
 from typing import Mapping
+
 from databases import Database
 from fastapi import HTTPException
+
 from app.crud import users as users_crud
 
 

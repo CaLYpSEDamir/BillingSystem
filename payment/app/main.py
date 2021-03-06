@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 
 from .api.v1 import api_router
-from .database import create_tables, db
 from .broker import create_topics
 from .broker.producer import event_producer
+from .database import create_tables, db
 
 app = FastAPI(
     title="Billing System",

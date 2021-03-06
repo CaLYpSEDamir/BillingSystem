@@ -1,6 +1,5 @@
 from kafka.admin import KafkaAdminClient
 
-
 CLIENT_ID = 'payment'
 KAFKA_INSTANCE = "localhost:9092"
 

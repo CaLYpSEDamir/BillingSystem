@@ -7,8 +7,8 @@ import asyncio
 
 from aiokafka import AIOKafkaConsumer
 
-from app.database import db
 from app.broker.operations import prepare_event
+from app.database import db
 
 # FIXME here call topic creation
 # FIXME or make it with docker command

@@ -101,4 +101,4 @@ def check_errors():
 
 
 if __name__ == '__main__':
-    run(50)
+    run(3)

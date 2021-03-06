@@ -2,11 +2,8 @@ import json
 from typing import Any, Dict
 
 from app.crud import event as event_crud
-from app.schemas.transactions import (
-    TransferMoneyEventSchema, EventEnum,
-)
-
 from app.database import db
+from app.schemas.transactions import EventEnum, TransferMoneyEventSchema
 
 
 async def prepare_event(event):

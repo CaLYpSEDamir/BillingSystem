@@ -1,9 +1,8 @@
 import asyncio
 
 from aiokafka import AIOKafkaProducer
-from app.schemas.transactions import (
-    TransferMoneyEventSchema,
-)
+
+from app.schemas.transactions import TransferMoneyEventSchema
 
 CLIENT_ID = 'payment'
 KAFKA_INSTANCE = "localhost:9092"

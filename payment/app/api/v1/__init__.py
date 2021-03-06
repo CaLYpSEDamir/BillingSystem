@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1.routers import users, balances, transactions
+from app.api.v1.routers import balances, transactions, users
 
 api_router = APIRouter(prefix="/users")
 api_router.include_router(users.router, tags=["users"])

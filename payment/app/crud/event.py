@@ -1,16 +1,12 @@
-from databases import Database
 from typing import Mapping, Optional
 
 from asyncpg.exceptions import CheckViolationError
+from databases import Database
 
-from app.crud import (
-    balances as balances_crud,
-    transactions as trans_crud,
-)
-from app.models import (
-    TransactionStateEnum as TSE,
-    BALANCES_AMOUNT_CHECK_NAME,
-)
+from app.crud import balances as balances_crud
+from app.crud import transactions as trans_crud
+from app.models import BALANCES_AMOUNT_CHECK_NAME
+from app.models import TransactionStateEnum as TSE
 from app.schemas.transactions import TransferMoneyEventSchema
 
 TRANS_NOT_FOUND_ERR = 'Transaction with ID {0} is not found.'
@@ -54,7 +50,7 @@ async def prepare_transfer_money_event(
             if locked_trans['state'] != TSE.PENDING:
                 return
 
-            first_update_query, second_update_query = _order_queries(
+            first_update_query, second_update_query = _order_update_queries(
                 from_user=event.from_user,
                 to_user=event.to_user,
                 amount=event.amount,
@@ -77,13 +73,14 @@ async def prepare_transfer_money_event(
             raise err
 
 
-def _order_queries(from_user: int, to_user: int, amount: float):
+def _order_update_queries(from_user: int, to_user: int, amount: float):
     """Avoiding deadlocks."""
-    subtraction_query = f'UPDATE balances SET amount = amount-{amount} WHERE owner = {from_user};'
-    addition_query = f'UPDATE balances SET amount = amount+{amount} WHERE owner = {to_user};'
-
     subtraction_query = balances_crud.amount_update_query(
         owner=from_user, amount=(-1 * amount),
+    )
+
+    addition_query = balances_crud.amount_update_query(
+        owner=to_user, amount=amount,
     )
 
     min_ = min(from_user, to_user)

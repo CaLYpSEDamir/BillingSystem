@@ -1,15 +1,15 @@
-from fastapi import APIRouter
-from app.database import db
+from typing import List
+
+from fastapi import APIRouter, HTTPException
+
 from app.api.v1.routers.utils import get_user
-from app.schemas.transactions import (
-    AddMoneyInSchema,
-    TransferMoneyEventSchema,
-    TransferMoneyInSchema,
-    TransferSchema,
-    EventEnum,
-)
-from app.crud import transactions as trans_crud
 from app.broker.producer import event_producer
+from app.crud import transactions as trans_crud
+from app.database import db
+from app.schemas.transactions import (AddMoneyInSchema, EventEnum,
+                                      TransactionSchema,
+                                      TransferMoneyEventSchema,
+                                      TransferMoneyInSchema, TransferSchema)
 
 router = APIRouter()
 
@@ -18,7 +18,7 @@ router = APIRouter()
     "/{user_id}/add_money/",
 )
 async def add_money(user_id: int, body: AddMoneyInSchema):
-    """"""
+    """Add money to user's balance."""
     await get_user(db=db, user_id=user_id)
 
     transfer = TransferSchema(
@@ -39,15 +39,19 @@ async def add_money(user_id: int, body: AddMoneyInSchema):
     )
 
     await event_producer.send_event(event=add_money_event)
-    import asyncio
-    # await asyncio.sleep(1)
 
 
 @router.post(
     "/{user_id}/transfer_money/",
 )
 async def transfer_money(user_id: int, body: TransferMoneyInSchema):
-    """"""
+    """Transfer money from user to another one."""
+    if user_id == body.to_user:
+        raise HTTPException(
+            status_code=400,
+            detail="User cannot transfer money to himself."
+        )
+
     await get_user(db=db, user_id=user_id)
     await get_user(db=db, user_id=body.to_user)
 
@@ -69,17 +73,21 @@ async def transfer_money(user_id: int, body: TransferMoneyInSchema):
     )
 
     await event_producer.send_event(event=transfer_money_event)
-    import asyncio
-    # await asyncio.sleep(1)
-
 
 
 @router.get(
-    "/history/",
-    # response_model=List[schemas.User],
+    "/{user_id}/history/",
+    response_model=List[TransactionSchema],
 )
-def history():
+async def transactions_history(
+        user_id: int,
+        limit: int = 50,
+        offset: int = 0,
+):
     """
-    Retrieve users transactions history.
+    Get user's transactions history.
     """
-    print('History')
+    await get_user(db=db, user_id=user_id)
+    return await trans_crud.list_transactions(
+        db=db, user_id=user_id, limit=limit, offset=offset,
+    )
