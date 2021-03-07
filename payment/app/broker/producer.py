@@ -17,8 +17,6 @@ class EventProducer(AIOKafkaProducer):
 
 loop = asyncio.get_event_loop()
 
-print(f'{broker_config.broker_host}:{broker_config.broker_port}')
-
 event_producer = EventProducer(
     loop=loop,
     client_id=broker_config.client_id,

@@ -41,8 +41,3 @@ def describe_topics(topics: List[str]):
     """Get topics descriptions."""
     print('All topics:', admin_client.list_topics())
     print(admin_client.describe_topics(topics))
-
-# if __name__ == '__main__':
-#     pass
-#     delete([get_topic_name()])
-#     describe_topics([get_topic_name()])

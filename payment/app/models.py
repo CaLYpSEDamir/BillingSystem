@@ -32,7 +32,13 @@ balances = sa.Table(
 
 
 class TransactionStateEnum(enum.IntEnum):
-    """"""
+    """Transaction statuses.
+
+       On transaction creating PENDING status is set.
+       On transaction success preparation SUCCESS status is set.
+       On money tranferring, if not enough money of user
+       NOT_ENOUGH_MONEY status is set.
+    """
     PENDING = 1
     SUCCESS = 2
     NOT_ENOUGH_MONEY = 3
