@@ -80,25 +80,5 @@ def run(n):
     return responses
 
 
-############################################
-
-async def wait(i):
-    if i == 1:
-        raise
-    await asyncio.sleep(1)
-    print('asd')
-
-
-async def run_errors():
-    tasks = [wait(i) for i in range(5)]
-    responses = await asyncio.gather(*tasks, return_exceptions=True)
-    return responses
-
-
-def check_errors():
-    r = asyncio.run(run_errors())
-    print(r)
-
-
 if __name__ == '__main__':
     run(3)

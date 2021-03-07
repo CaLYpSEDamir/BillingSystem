@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 
-from .api.v1 import api_router
-from .broker import create_topics
-from .broker.producer import event_producer
-from .database import create_tables, db
+from app.api.v1 import api_router
+from app.broker.producer import event_producer
+from app.broker.topics import create_topic
+from app.database import create_tables, db
 
 app = FastAPI(
     title="Billing System",
@@ -31,6 +31,6 @@ async def shutdown_event():
 
 
 create_tables()
-create_topics()
+create_topic()
 
 app.include_router(api_router)

@@ -8,46 +8,37 @@ import asyncio
 from aiokafka import AIOKafkaConsumer
 
 from app.broker.operations import prepare_event
+from app.broker.topics import create_topic, get_topic_name
 from app.database import db
 
 # FIXME here call topic creation
 # FIXME or make it with docker command
 
 
-# DATABASE_URL = 'postgresql://payment:payment@localhost:5432/payment'
-# engine = sqlalchemy.create_engine(DATABASE_URL)
-# db = databases.Database(
-#     DATABASE_URL,
-#     min_size=5,
-#     max_size=10,
-# )
-
-topic = 'addition'
+topic = get_topic_name()
+create_topic()
 loop = asyncio.get_event_loop()
 
 
 async def consume():
-    """"""
+    """Reading events and updating user balances"""
     await db.connect()
 
     consumer = AIOKafkaConsumer(
         topic,
         loop=loop,
-        bootstrap_servers='localhost:9092',
+        # bootstrap_servers='localhost:9092',
+        bootstrap_servers='kafka:9092',
         group_id="addition-consumer",
     )
     await consumer.start()
 
     try:
         async for event in consumer:
-            print('Consumed:', event.offset)
-            # print("consumed: ", msg.topic, msg.partition, msg.offset, msg.key, msg.value, msg.timestamp)
             loop.create_task(prepare_event(event=event))
-
     finally:
-        # Will leave consumer group; perform autocommit if enabled.
         await consumer.stop()
         await db.disconnect()
 
-
+print(f'Starting consuming messages from `{topic}` topic.')
 loop.run_until_complete(consume())

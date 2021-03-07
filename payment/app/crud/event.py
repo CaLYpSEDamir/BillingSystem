@@ -15,7 +15,7 @@ TRANS_NOT_FOUND_ERR = 'Transaction with ID {0} is not found.'
 async def prepare_adding_money_event(
         db: Database, event: TransferMoneyEventSchema,
 ):
-    """"""
+    """Adding money to user balance."""
     async with db.transaction():
         locked_trans: Optional[Mapping] = await trans_crud.get_transaction(
             db=db, trans_id=event.transaction_id, for_update=True,
@@ -23,6 +23,7 @@ async def prepare_adding_money_event(
         if locked_trans is None:
             raise Exception(TRANS_NOT_FOUND_ERR.format(event.transaction_id))
 
+        # tolerance for double reading same data
         if locked_trans['state'] != TSE.PENDING:
             return
 
@@ -38,7 +39,7 @@ async def prepare_adding_money_event(
 async def prepare_transfer_money_event(
         db: Database, event: TransferMoneyEventSchema,
 ):
-    """"""
+    """Transfer money from user to another."""
     try:
         async with db.transaction():
             locked_trans: Optional[Mapping] = await trans_crud.get_transaction(
@@ -47,6 +48,7 @@ async def prepare_transfer_money_event(
             if locked_trans is None:
                 raise Exception(TRANS_NOT_FOUND_ERR.format(event.transaction_id))
 
+            # tolerance for double reading same data
             if locked_trans['state'] != TSE.PENDING:
                 return
 
@@ -64,6 +66,7 @@ async def prepare_transfer_money_event(
             )
 
     except Exception as err:
+        # Catching the setting of negative value to amount
         if type(err) == CheckViolationError and BALANCES_AMOUNT_CHECK_NAME in str(err):
             await trans_crud.update_state(
                 db=db, trans_id=event.transaction_id, state=TSE.NOT_ENOUGH_MONEY,
@@ -74,7 +77,7 @@ async def prepare_transfer_money_event(
 
 
 def _order_update_queries(from_user: int, to_user: int, amount: float):
-    """Avoiding deadlocks."""
+    """For avoiding deadlocks sort queries by id."""
     subtraction_query = balances_crud.amount_update_query(
         owner=from_user, amount=(-1 * amount),
     )

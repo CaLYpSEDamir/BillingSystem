@@ -2,8 +2,6 @@ import databases
 import sqlalchemy
 from pydantic import BaseSettings
 
-# from sqlalchemy.ext.declarative import declarative_base
-
 
 class DBSettings(BaseSettings):
     postgres_host = 'localhost'
@@ -20,19 +18,17 @@ DATABASE_URL = f"postgresql://" \
                f"{db_config.postgres_host}:{db_config.postgres_port}/" \
                f"{db_config.postgres_db}"
 
-print(DATABASE_URL)
 engine = sqlalchemy.create_engine(DATABASE_URL)
 db = databases.Database(
     DATABASE_URL,
     min_size=5,
     max_size=10,
 )
-print("Init DB")
-# Base = declarative_base()
+
 metadata = sqlalchemy.MetaData()
 
 
 def create_tables():
-    """"""
-    # Base.metadata.create_all(bind=engine)
+    """Creating tables in db."""
+    print('Staring tables creation.')
     metadata.create_all(engine)
