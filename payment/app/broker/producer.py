@@ -3,12 +3,7 @@ import asyncio
 from aiokafka import AIOKafkaProducer
 
 from app.schemas.transactions import TransferMoneyEventSchema
-
-CLIENT_ID = 'payment'
-# KAFKA_INSTANCE = "localhost:9092"
-KAFKA_INSTANCE = "kafka:9092"
-TOPIC = 'addition'
-TOPIC_PARTITIONS = 2
+from app.settings import broker_config
 
 
 class EventProducer(AIOKafkaProducer):
@@ -17,13 +12,15 @@ class EventProducer(AIOKafkaProducer):
     async def send_event(self, event: TransferMoneyEventSchema):
         assert type(event) == TransferMoneyEventSchema, 'Event must be TransferMoneyEventSchema type.'
 
-        await self.send(TOPIC, event.json().encode())
+        await self.send(broker_config.topic_name, event.json().encode())
 
 
 loop = asyncio.get_event_loop()
 
+print(f'{broker_config.broker_host}:{broker_config.broker_port}')
+
 event_producer = EventProducer(
     loop=loop,
-    client_id=CLIENT_ID,
-    bootstrap_servers=KAFKA_INSTANCE,
+    client_id=broker_config.client_id,
+    bootstrap_servers=f'{broker_config.broker_host}:{broker_config.broker_port}',
 )

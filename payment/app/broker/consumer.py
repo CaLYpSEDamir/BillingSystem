@@ -8,14 +8,10 @@ import asyncio
 from aiokafka import AIOKafkaConsumer
 
 from app.broker.operations import prepare_event
-from app.broker.topics import create_topic, get_topic_name
+from app.broker.topics import create_topic
 from app.database import db
+from app.settings import broker_config
 
-# FIXME here call topic creation
-# FIXME or make it with docker command
-
-
-topic = get_topic_name()
 create_topic()
 loop = asyncio.get_event_loop()
 
@@ -25,11 +21,10 @@ async def consume():
     await db.connect()
 
     consumer = AIOKafkaConsumer(
-        topic,
+        broker_config.topic_name,
         loop=loop,
-        # bootstrap_servers='localhost:9092',
-        bootstrap_servers='kafka:9092',
-        group_id="addition-consumer",
+        bootstrap_servers=f'{broker_config.broker_host}:{broker_config.broker_port}',
+        group_id=broker_config.consumer_group_id,
     )
     await consumer.start()
 
@@ -40,5 +35,6 @@ async def consume():
         await consumer.stop()
         await db.disconnect()
 
-print(f'Starting consuming messages from `{topic}` topic.')
+
+print(f'Starting consuming messages from `{broker_config.topic_name}` topic.')
 loop.run_until_complete(consume())

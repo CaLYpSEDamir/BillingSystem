@@ -9,7 +9,7 @@ from app.schemas.transactions import EventEnum, TransferMoneyEventSchema
 async def prepare_event(event):
     """"""
     try:
-        print('Started:', event.offset)
+        print('Started preparing:', event.offset)
         payload = json.loads(event.value)
 
         if payload['type'] == EventEnum.addition:
@@ -22,12 +22,11 @@ async def prepare_event(event):
     except Exception as e:
         print(f'Error: {e}', event.topic, event.partition,
               event.offset, event.key, event.value, event.timestamp)
-    print('Ended:', event.offset)
+    print('Ended preparing:', event.offset)
 
 
 async def add_money(payload: Dict[str, Any]):
-    """Tolerance for double preparing same data."""
-
+    """Preparing adding money event."""
     add_event = TransferMoneyEventSchema(**payload)
     await event_crud.prepare_adding_money_event(
         db=db, event=add_event,
@@ -35,6 +34,7 @@ async def add_money(payload: Dict[str, Any]):
 
 
 async def transfer_money(payload: Dict[str, Any]):
+    """Preparing transferring money event."""
     transfer_event = TransferMoneyEventSchema(**payload)
     await event_crud.prepare_transfer_money_event(
         db=db, event=transfer_event,

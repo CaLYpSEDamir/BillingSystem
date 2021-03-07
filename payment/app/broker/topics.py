@@ -2,40 +2,29 @@ from typing import List
 
 from kafka.admin import KafkaAdminClient, NewTopic
 
-CLIENT_ID = 'payment'
-KAFKA_INSTANCE = "kafka:9092"
-# KAFKA_INSTANCE = "localhost:9092"
-
-# fixme needs settings
+from app.settings import broker_config
 
 admin_client = KafkaAdminClient(
-        bootstrap_servers=KAFKA_INSTANCE,
-        client_id=CLIENT_ID,
-    )
-
-
-def get_topic_name():
-    """Get topic name from settings."""
-    topic_name = 'addition'
-    return topic_name
+    bootstrap_servers=f'{broker_config.broker_host}:{broker_config.broker_port}',
+    client_id=broker_config.client_id,
+)
 
 
 def create_topic():
     """Creating topic in broker."""
+    print(f'Starting creating topic {broker_config.topic_name}')
 
-    print('Starting creating topic')
-    topic_name = get_topic_name()
+    topic_name = broker_config.topic_name
     exist_topics = admin_client.list_topics()
 
     if topic_name not in exist_topics:
         topic = NewTopic(
-                name=topic_name,
-                num_partitions=2,
-                replication_factor=1,
-            )
+            name=topic_name,
+            num_partitions=broker_config.topic_partition_count,
+            replication_factor=1,
+        )
         admin_client.create_topics(
             new_topics=[topic],
-            timeout_ms=3000,
             validate_only=False,
         )
         print(f'Topic `{topic_name}` was created')
@@ -51,8 +40,7 @@ def delete(topics: List[str]):
 def describe_topics(topics: List[str]):
     """Get topics descriptions."""
     print('All topics:', admin_client.list_topics())
-    print('', admin_client.describe_topics(topics))
-
+    print(admin_client.describe_topics(topics))
 
 # if __name__ == '__main__':
 #     pass

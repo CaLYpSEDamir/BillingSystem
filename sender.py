@@ -19,13 +19,7 @@ def timeit(func):
 
 
 async def fetch(session, url, data):
-    """Execute an http call async
-    Args:
-        session: contexte for making the http call
-        url: URL to call
-    Return:
-        responses: A dict like object containing http response
-    """
+    """"""
     # data = json.dumps({'amount': 1})
     data = json.dumps(data)
     async with session.post(url, data=data) as response:
@@ -35,12 +29,7 @@ async def fetch(session, url, data):
 
 
 async def fetch_all(count):
-    """ Gather many HTTP call made async
-    Args:
-        cities: a list of string
-    Return:
-        responses: A list of dict like object containing http response
-    """
+    """"""
     async with aiohttp.ClientSession() as session:
         tasks = []
         for i in range(count):
@@ -79,6 +68,5 @@ def run(n):
     responses = asyncio.run(fetch_all(n))
     return responses
 
-
-if __name__ == '__main__':
-    run(3)
+# if __name__ == '__main__':
+#     run(3)
