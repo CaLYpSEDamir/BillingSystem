@@ -1,0 +1,18 @@
+# Database settings
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=payment
+POSTGRES_USER=payment
+POSTGRES_PASSWORD=payment
+
+# DB connection pool settings
+POOL_MIN_SIZE=5
+POOL_MAX_SIZE=10
+
+# Broker settings
+BROKER_HOST=kafka
+BROKER_PORT=9092
+TOPIC_NAME=transactions
+TOPIC_PARTITION_COUNT=1
+CLIENT_ID=payment_client_id
+CONSUMER_GROUP_ID=payment_group

@@ -10,7 +10,7 @@ services:
       - 8000:8000
     command: start_server
     env_file:
-      - ./payment/docker/.env
+      - ./payment/docker/env
     depends_on:
       - postgres
       - kafka
@@ -22,7 +22,7 @@ services:
       context: ./payment
     command: start_consumer
     env_file:
-      - ./payment/docker/.env
+      - ./payment/docker/env
     depends_on:
       - postgres
       - kafka
@@ -36,7 +36,7 @@ services:
     volumes:
       - payment_pg:/var/lib/postgresql/data
     env_file:
-      - ./payment/docker/.env
+      - ./payment/docker/env
 
   zookeeper:
     image: bitnami/zookeeper:latest
